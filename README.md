@@ -9,10 +9,13 @@ OpenSearch hybrid index, built for the Newpage AI FDE assignment (Option 2).
 Prereqs: Docker (compose v2), an OpenAI API key.
 
 ```bash
-export CODEDOC_OPENAI_API_KEY=sk-…
+export CODEDOC_OPENAI_API_KEY=sk-…   # or: cp .env.example .env and fill it in
 docker compose up --build
 # frontend http://localhost:3000 · api http://localhost:8000 · opensearch http://localhost:9200
 ```
+
+(`backend/.env.example` and `frontend/.env.example` cover running either service
+outside docker.)
 
 Optional: `docker compose --profile debug up -d dashboards` → OpenSearch Dashboards
 on http://localhost:5601 (browse the `query-traces` index).
