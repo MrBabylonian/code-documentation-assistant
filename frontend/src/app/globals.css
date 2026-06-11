@@ -1,0 +1,6 @@
+@import "tailwindcss";
+
+:root {
+  /* Dark-only developer tool: native controls and scrollbars render dark. */
+  color-scheme: dark;
+}
