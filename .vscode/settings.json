@@ -1,0 +1,13 @@
+{
+  // docker compose merge tags (!override replaces a list/map instead of appending,
+  // !reset removes it) — valid compose syntax the YAML language server doesn't
+  // know by default
+  "yaml.customTags": [
+    "!override sequence",
+    "!override mapping",
+    "!override scalar",
+    "!reset sequence",
+    "!reset mapping",
+    "!reset scalar"
+  ]
+}
