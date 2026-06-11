@@ -1,0 +1,32 @@
+backend/.env.example
+  s_e7c837504436c3::t_5c99cdc98a3242 1-16
+frontend/.env.example
+  s_e7c837504436c3::t_0efdaa7944ebed 1-3
+frontend/.gitignore
+  s_e7c837504436c3::t_493218db61ee7a 35
+README.md
+  s_e7c837504436c3::t_f292d58ae966a0 12,17-18
+.env.example
+  s_e7c837504436c3::t_ddb2759ba7cb0b 1-3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "ca4cf013e9fbd5841c234d0408be5d5d83453066",
+  "prompts": {},
+  "humans": {
+    "h_83703cc0278db0": {
+      "author": "Bedirhan Gilgiler <bedirhangilgiler@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_e7c837504436c3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "426c1489-49f1-4b40-91e7-620252ebeeb0",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Bedirhan Gilgiler <bedirhangilgiler@gmail.com>"
+    }
+  }
+}
