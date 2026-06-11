@@ -129,3 +129,24 @@ async def test_list_repositories(api_client: httpx.AsyncClient) -> None:
     list_response = await api_client.get("/api/repositories")
     assert list_response.status_code == 200
     assert isinstance(list_response.json(), list)
+
+
+async def test_cors_allows_the_frontend_origin(api_client: httpx.AsyncClient) -> None:
+    # the browser at localhost:3000 calls the api cross-origin; without CORS headers
+    # every fetch dies as "Failed to fetch" before reaching application code
+    preflight_response = await api_client.options(
+        "/api/repositories",
+        headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+    assert preflight_response.status_code == 200
+    assert (
+        preflight_response.headers["access-control-allow-origin"] == "http://localhost:3000"
+    )
+
+    simple_response = await api_client.get(
+        "/healthz", headers={"Origin": "http://localhost:3000"}
+    )
+    assert simple_response.headers["access-control-allow-origin"] == "http://localhost:3000"

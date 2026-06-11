@@ -27,3 +27,7 @@ class AppSettings(BaseSettings):
 
     chat_input_cost_per_mtok_usd: float = 0.75
     chat_output_cost_per_mtok_usd: float = 4.50
+
+    # browser origins allowed to call the api; 3001 covers `next dev` falling back
+    # when 3000 is already taken by the dockerized frontend
+    cors_allowed_origins: list[str] = ["http://localhost:3000", "http://localhost:3001"]

@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 import structlog
 from fastapi import FastAPI, Request, Response
+from fastapi.middleware.cors import CORSMiddleware
 from langchain_core.embeddings import Embeddings
 from langchain_core.language_models import BaseChatModel
 from opensearchpy import AsyncOpenSearch
@@ -200,6 +201,15 @@ def create_application(
             await container.opensearch_client.close()
 
     application = FastAPI(title="codedoc", lifespan=lifespan)
+
+    # the browser calls the api cross-origin (frontend :3000 → api :8000);
+    # without this, every fetch fails before reaching application code
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=resolved_settings.cors_allowed_origins,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
 
     @application.middleware("http")
     async def bind_request_id(
