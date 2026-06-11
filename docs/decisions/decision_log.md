@@ -11,3 +11,8 @@
 | 2026-06-11 | LangChain core interfaces ARE the LLM ports | wrapping already-abstract provider-agnostic interfaces is single-implementation interface theater; provider swap = one line in the composition root |
 | 2026-06-11 | Ingestion as in-process asyncio task | no queue infra for a demo; strong-ref task set + status doc; SQS + worker is the documented production path |
 | 2026-06-11 | Chat history client-side | server stays stateless; persistence is listed future work |
+| 2026-06-11 | StructuredTool.from_function(coroutine=…) over @tool on async def | @tool's async support is undocumented in langchain 1.x; the explicit form is verified |
+| 2026-06-11 | SSE tests against finite streams only | httpx ASGITransport buffers entire bodies; infinite generators would hang tests |
+| 2026-06-11 | shiki lazy-loaded client-side, plain numbered fallback first | highlighting is progressive enhancement; keeps the main bundle lean |
+| 2026-06-11 | Evals run manually, never in CI | non-deterministic + costs real OpenAI tokens; reports are committed artifacts |
+| 2026-06-11 | Citation grounding = parse → validate vs evidence → one retry | hard guarantee that cited spans were actually retrieved this turn |
