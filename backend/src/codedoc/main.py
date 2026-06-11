@@ -37,6 +37,7 @@ from codedoc.domain.chat import AnswerMode
 from codedoc.infrastructure.agents.agent_toolset import AgentToolset
 from codedoc.infrastructure.agents.agentic_answer_strategy import AgenticAnswerStrategy
 from codedoc.infrastructure.git.git_clone_client import GitCloneClient
+from codedoc.infrastructure.openai.retrying_embeddings import RetryingEmbeddings
 from codedoc.infrastructure.opensearch.index_bootstrapper import IndexBootstrapper
 from codedoc.infrastructure.opensearch.opensearch_chunk_repository import (
     OpensearchChunkRepository,
@@ -72,11 +73,13 @@ def build_default_container(settings: AppSettings) -> ApplicationContainer:
     from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
     opensearch_client = AsyncOpenSearch(hosts=[settings.opensearch_url])
-    embeddings = OpenAIEmbeddings(
-        model=settings.embedding_model_name,
-        # field name, not the "api_key" alias: mypy's pydantic plugin wants the field,
-        # pyright's synthesized __init__ wants the alias — mypy is the CI gate, pyright yields
-        openai_api_key=settings.openai_api_key,  # pyright: ignore[reportCallIssue]
+    embeddings = RetryingEmbeddings(
+        OpenAIEmbeddings(
+            model=settings.embedding_model_name,
+            # field name, not the "api_key" alias: mypy's pydantic plugin wants the field,
+            # pyright's synthesized __init__ wants the alias — mypy is the CI gate, pyright yields
+            openai_api_key=settings.openai_api_key,  # pyright: ignore[reportCallIssue]
+        )
     )
     repository_store = OpensearchRepositoryStore(opensearch_client)
     chunk_repository = OpensearchChunkRepository(opensearch_client)

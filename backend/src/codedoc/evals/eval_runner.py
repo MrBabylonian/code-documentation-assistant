@@ -161,6 +161,28 @@ async def _evaluate_question(
     )
 
 
+async def _evaluate_question_resiliently(
+    container: ApplicationContainer,
+    repository_id: str,
+    question: GoldenQuestion,
+    mode: AnswerMode,
+) -> QuestionResult:
+    """One retry per question, then a metrics-empty row — a transient provider error
+    (431s were observed in the wild) must degrade the report, not kill the run."""
+    for attempt_number in (1, 2):
+        try:
+            return await _evaluate_question(container, repository_id, question, mode)
+        except Exception as evaluation_error:  # noqa: BLE001
+            print(f"  {question.id} attempt {attempt_number} failed: {evaluation_error}")
+            if attempt_number == 1:
+                await asyncio.sleep(2)
+    return QuestionResult(
+        question_id=question.id, category=question.category, hit_at_5=None,
+        reciprocal_rank=None, faithfulness=None, correctness=None, is_grounded=None,
+        refused_ok=None, latency_ms=0, cost_usd=0.0,
+    )
+
+
 async def run_evals(
     repository_url: str,
     modes: list[AnswerMode],
@@ -192,7 +214,7 @@ async def run_evals(
     for mode in modes:
         print(f"running {len(questions)} questions in mode={mode.value} …")
         mode_results[mode.value] = [
-            await _evaluate_question(container, repository_id, question, mode)
+            await _evaluate_question_resiliently(container, repository_id, question, mode)
             for question in questions
         ]
 
