@@ -65,25 +65,36 @@ class QuestionAnsweringService:
                 pending_tool_calls.append((event, time.monotonic()))
             elif isinstance(event, ToolResultEvent) and pending_tool_calls:
                 call_event, call_started_at_seconds = pending_tool_calls.pop(0)
-                trace_steps.append(TraceStep(
-                    step_kind="tool_call",
-                    name=event.tool_name,
-                    arguments_json=json.dumps(call_event.arguments),
-                    summary=event.summary,
-                    duration_ms=int((time.monotonic() - call_started_at_seconds) * 1000),
-                ))
+                trace_steps.append(
+                    TraceStep(
+                        step_kind="tool_call",
+                        name=event.tool_name,
+                        arguments_json=json.dumps(call_event.arguments),
+                        summary=event.summary,
+                        duration_ms=int((time.monotonic() - call_started_at_seconds) * 1000),
+                    )
+                )
             elif isinstance(event, AnswerRestartEvent):
-                trace_steps.append(TraceStep(
-                    step_kind="model_call", name="citation_retry",
-                    arguments_json="{}", summary=event.reason, duration_ms=0,
-                ))
+                trace_steps.append(
+                    TraceStep(
+                        step_kind="model_call",
+                        name="citation_retry",
+                        arguments_json="{}",
+                        summary=event.reason,
+                        duration_ms=0,
+                    )
+                )
             elif isinstance(event, AnswerCompletedEvent):
                 await self._write_trace(repository_id, question, mode, trace_steps, event.answer)
             yield event
 
     async def _write_trace(
-        self, repository_id: str, question: str, mode: AnswerMode,
-        trace_steps: list[TraceStep], answer: Answer,
+        self,
+        repository_id: str,
+        question: str,
+        mode: AnswerMode,
+        trace_steps: list[TraceStep],
+        answer: Answer,
     ) -> None:
         trace = QueryTrace(
             trace_id=uuid.uuid4().hex,

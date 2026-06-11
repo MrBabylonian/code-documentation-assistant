@@ -39,7 +39,10 @@ async def test_file_span_endpoint_serves_citation_viewer() -> None:
         )
         assert span_response.status_code == 200
         assert span_response.json() == {
-            "file_path": "src/auth.py", "start_line": 1, "end_line": 2, "content": "l1\nl2",
+            "file_path": "src/auth.py",
+            "start_line": 1,
+            "end_line": 2,
+            "content": "l1\nl2",
         }
 
         missing_response = await api_client.get(

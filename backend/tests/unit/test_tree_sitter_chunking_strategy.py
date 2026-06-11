@@ -33,8 +33,7 @@ def test_python_symbols_with_decorator_ranges_and_docstrings() -> None:
         ("async_function", SymbolKind.FUNCTION, 29, 31),
     ]
     actual_summary = [
-        (chunk.symbol_name, chunk.symbol_kind, chunk.start_line, chunk.end_line)
-        for chunk in chunks
+        (chunk.symbol_name, chunk.symbol_kind, chunk.start_line, chunk.end_line) for chunk in chunks
     ]
     assert actual_summary == expected_summary
 
@@ -51,8 +50,13 @@ def test_python_oversized_class_splits_into_methods_with_enclosing_scope() -> No
         chunk for chunk in chunks if chunk.start_line >= 18 and chunk.end_line <= 26
     ]
     summary = [
-        (chunk.symbol_name, chunk.symbol_kind, chunk.start_line, chunk.end_line,
-         chunk.enclosing_scope)
+        (
+            chunk.symbol_name,
+            chunk.symbol_kind,
+            chunk.start_line,
+            chunk.end_line,
+            chunk.enclosing_scope,
+        )
         for chunk in class_related_chunks
     ]
     assert ("SampleService", SymbolKind.CLASS, 18, 20, None) in summary
@@ -75,8 +79,7 @@ def test_typescript_symbols_including_exports_interfaces_and_arrow_functions() -
         ("functionExpressionHandler", SymbolKind.FUNCTION, 19, 21),
     ]
     actual_summary = [
-        (chunk.symbol_name, chunk.symbol_kind, chunk.start_line, chunk.end_line)
-        for chunk in chunks
+        (chunk.symbol_name, chunk.symbol_kind, chunk.start_line, chunk.end_line) for chunk in chunks
     ]
     assert actual_summary == expected_summary
 

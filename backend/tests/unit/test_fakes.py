@@ -12,9 +12,16 @@ from tests.unit.fakes import (
 def _make_chunk(repository_id: str, file_path: str, symbol_name: str, code: str) -> CodeChunk:
     return CodeChunk(
         chunk_id=build_chunk_id(repository_id, file_path, 1, 5),
-        repository_id=repository_id, file_path=file_path, language="python",
-        start_line=1, end_line=5, symbol_name=symbol_name,
-        symbol_kind=SymbolKind.FUNCTION, enclosing_scope=None, docstring=None, code=code,
+        repository_id=repository_id,
+        file_path=file_path,
+        language="python",
+        start_line=1,
+        end_line=5,
+        symbol_name=symbol_name,
+        symbol_kind=SymbolKind.FUNCTION,
+        enclosing_scope=None,
+        docstring=None,
+        code=code,
     )
 
 
@@ -79,9 +86,15 @@ async def test_repository_store_roundtrip() -> None:
     repository_store = InMemoryRepositoryStore()
     assert await repository_store.get("missing") is None
     repository = CodeRepository(
-        repository_id="abc", github_url="https://github.com/owner/repo", name="owner/repo",
-        status=IngestionStatus.PENDING, error_message=None, indexed_file_count=0,
-        indexed_chunk_count=0, created_at=datetime.now(UTC), updated_at=datetime.now(UTC),
+        repository_id="abc",
+        github_url="https://github.com/owner/repo",
+        name="owner/repo",
+        status=IngestionStatus.PENDING,
+        error_message=None,
+        indexed_file_count=0,
+        indexed_chunk_count=0,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
     await repository_store.save(repository)
     stored_repository = await repository_store.get("abc")
@@ -117,6 +130,11 @@ def test_fakes_satisfy_their_protocols() -> None:
     assert all(
         instance is not None
         for instance in (
-            chunk_writer, chunk_searcher, file_writer, file_reader, repository_store, trace_writer
+            chunk_writer,
+            chunk_searcher,
+            file_writer,
+            file_reader,
+            repository_store,
+            trace_writer,
         )
     )

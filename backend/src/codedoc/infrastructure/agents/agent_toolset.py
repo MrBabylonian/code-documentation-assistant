@@ -104,8 +104,11 @@ class AgentToolset:
             # an error STRING, not an exception: the agent should see it and recover
             return MISSING_SPAN_MESSAGE
         self._collected_evidence.append(
-            Citation(file_path=file_span.file_path, start_line=file_span.start_line,
-                     end_line=file_span.end_line)
+            Citation(
+                file_path=file_span.file_path,
+                start_line=file_span.start_line,
+                end_line=file_span.end_line,
+            )
         )
         return self._evidence_formatter.format_file_span(file_span)
 
@@ -125,7 +128,8 @@ class AgentToolset:
 
     def _record_chunks(self, chunks: list[CodeChunk]) -> None:
         self._collected_evidence.extend(
-            Citation(file_path=chunk.file_path, start_line=chunk.start_line,
-                     end_line=chunk.end_line)
+            Citation(
+                file_path=chunk.file_path, start_line=chunk.start_line, end_line=chunk.end_line
+            )
             for chunk in chunks
         )

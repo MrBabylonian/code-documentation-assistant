@@ -193,6 +193,4 @@ async def test_repository_store_roundtrip_and_missing(
     assert loaded_repository is not None
     assert loaded_repository.status is IngestionStatus.READY
     assert loaded_repository.indexed_chunk_count == 12
-    assert any(
-        entry.repository_id == repository_id for entry in await repository_store.list_all()
-    )
+    assert any(entry.repository_id == repository_id for entry in await repository_store.list_all())

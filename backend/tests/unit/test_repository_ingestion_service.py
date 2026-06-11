@@ -95,7 +95,10 @@ async def test_happy_path_walks_the_full_status_lifecycle_and_indexes() -> None:
     chunk_store = InMemoryChunkStore()
     file_store = InMemoryFileStore()
     service = _build_service(
-        FakeCloneClient(FIXTURE_FILES), repository_store, chunk_store, file_store,
+        FakeCloneClient(FIXTURE_FILES),
+        repository_store,
+        chunk_store,
+        file_store,
         BatchRecordingEmbeddings(),
     )
 
@@ -103,8 +106,12 @@ async def test_happy_path_walks_the_full_status_lifecycle_and_indexes() -> None:
 
     assert repository_id == build_repository_id("https://github.com/owner/fixture")
     assert repository_store.recorded_statuses == [
-        IngestionStatus.PENDING, IngestionStatus.CLONING, IngestionStatus.PARSING,
-        IngestionStatus.EMBEDDING, IngestionStatus.INDEXING, IngestionStatus.READY,
+        IngestionStatus.PENDING,
+        IngestionStatus.CLONING,
+        IngestionStatus.PARSING,
+        IngestionStatus.EMBEDDING,
+        IngestionStatus.INDEXING,
+        IngestionStatus.READY,
     ]
     stored_repository = await repository_store.get(repository_id)
     assert stored_repository is not None
@@ -119,7 +126,10 @@ async def test_clone_failure_marks_failed_with_message_and_does_not_raise() -> N
     repository_store = StatusRecordingRepositoryStore()
     service = _build_service(
         FakeCloneClient(FIXTURE_FILES, failure=CloneError("clone timed out after 120s")),
-        repository_store, InMemoryChunkStore(), InMemoryFileStore(), BatchRecordingEmbeddings(),
+        repository_store,
+        InMemoryChunkStore(),
+        InMemoryFileStore(),
+        BatchRecordingEmbeddings(),
     )
 
     repository_id = await service.ingest("https://github.com/owner/fixture")
@@ -143,8 +153,11 @@ async def test_re_ingestion_deletes_previous_documents_first() -> None:
     repository_store = StatusRecordingRepositoryStore()
     chunk_store = DeleteRecordingChunkStore()
     service = _build_service(
-        FakeCloneClient(FIXTURE_FILES), repository_store, chunk_store,
-        InMemoryFileStore(), BatchRecordingEmbeddings(),
+        FakeCloneClient(FIXTURE_FILES),
+        repository_store,
+        chunk_store,
+        InMemoryFileStore(),
+        BatchRecordingEmbeddings(),
     )
 
     await service.ingest("https://github.com/owner/fixture")
@@ -157,8 +170,12 @@ async def test_embedding_runs_in_configured_batches() -> None:
     many_files = {f"src/module_{index}.py": "def handler():\n    return 1\n" for index in range(5)}
     embeddings = BatchRecordingEmbeddings()
     service = _build_service(
-        FakeCloneClient(many_files), StatusRecordingRepositoryStore(), InMemoryChunkStore(),
-        InMemoryFileStore(), embeddings, embedding_batch_size=2,
+        FakeCloneClient(many_files),
+        StatusRecordingRepositoryStore(),
+        InMemoryChunkStore(),
+        InMemoryFileStore(),
+        embeddings,
+        embedding_batch_size=2,
     )
 
     await service.ingest("https://github.com/owner/fixture")

@@ -16,8 +16,13 @@ from tests.unit.fakes import InMemoryRepositoryStore, RecordingQueryTraceWriter
 FIXTURE_ANSWER = Answer(
     text="It is `authenticate_user`.",
     citations=[Citation(file_path="src/auth.py", start_line=10, end_line=42)],
-    is_grounded=True, mode=AnswerMode.AGENTIC, model_name="scripted",
-    input_tokens=100, output_tokens=20, estimated_cost_usd=0.001, latency_ms=42,
+    is_grounded=True,
+    mode=AnswerMode.AGENTIC,
+    model_name="scripted",
+    input_tokens=100,
+    output_tokens=20,
+    estimated_cost_usd=0.001,
+    latency_ms=42,
 )
 
 
@@ -37,11 +42,19 @@ async def _ready_repository_store() -> InMemoryRepositoryStore:
     from datetime import UTC, datetime
 
     repository_store = InMemoryRepositoryStore()
-    await repository_store.save(CodeRepository(
-        repository_id="repo1", github_url="https://github.com/owner/repo", name="owner/repo",
-        status=IngestionStatus.READY, error_message=None, indexed_file_count=1,
-        indexed_chunk_count=1, created_at=datetime.now(UTC), updated_at=datetime.now(UTC),
-    ))
+    await repository_store.save(
+        CodeRepository(
+            repository_id="repo1",
+            github_url="https://github.com/owner/repo",
+            name="owner/repo",
+            status=IngestionStatus.READY,
+            error_message=None,
+            indexed_file_count=1,
+            indexed_chunk_count=1,
+            created_at=datetime.now(UTC),
+            updated_at=datetime.now(UTC),
+        )
+    )
     return repository_store
 
 
@@ -72,7 +85,10 @@ async def test_forwards_strategy_events_and_writes_a_trace() -> None:
     events = await _collect(service, "where is auth?")
 
     assert [type(event).__name__ for event in events] == [
-        "ToolCallEvent", "ToolResultEvent", "AnswerTokenEvent", "AnswerCompletedEvent",
+        "ToolCallEvent",
+        "ToolResultEvent",
+        "AnswerTokenEvent",
+        "AnswerCompletedEvent",
     ]
     assert stub_strategy.received_questions == ["where is auth?"]
     assert len(trace_writer.recorded_traces) == 1

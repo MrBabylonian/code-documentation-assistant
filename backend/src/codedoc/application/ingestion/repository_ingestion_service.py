@@ -64,8 +64,11 @@ class RepositoryIngestionService:
             repository.status = IngestionStatus.FAILED
             repository.error_message = str(ingestion_error)
             await self._save(repository)
-            logger.error("ingestion_failed", repository_id=repository.repository_id,
-                         error=str(ingestion_error))
+            logger.error(
+                "ingestion_failed",
+                repository_id=repository.repository_id,
+                error=str(ingestion_error),
+            )
         return repository_id
 
     async def _run_pipeline(self, repository: CodeRepository) -> None:
@@ -97,8 +100,12 @@ class RepositoryIngestionService:
             repository.indexed_file_count = len(source_files)
             repository.indexed_chunk_count = len(embedded_chunks)
             await self._save(repository)
-            logger.info("ingestion_completed", repository_id=repository.repository_id,
-                        file_count=len(source_files), chunk_count=len(embedded_chunks))
+            logger.info(
+                "ingestion_completed",
+                repository_id=repository.repository_id,
+                file_count=len(source_files),
+                chunk_count=len(embedded_chunks),
+            )
 
     def _chunk_all(self, repository_id: str, source_files: list[SourceFile]) -> list[CodeChunk]:
         chunks: list[CodeChunk] = []

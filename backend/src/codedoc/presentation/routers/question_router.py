@@ -19,7 +19,8 @@ async def stream_answer(
     if container.question_answering_service is None:
         raise HTTPException(status_code=503, detail="answering service not configured")
     history = tuple(
-        ChatTurn(role=turn.role, text=turn.text) for turn in payload.history  # type: ignore[arg-type]
+        ChatTurn(role=turn.role, text=turn.text)  # type: ignore[arg-type]
+        for turn in payload.history
     )
 
     async def event_stream() -> AsyncIterator[bytes]:
@@ -46,6 +47,8 @@ async def get_file_span(
     if file_span is None:
         raise HTTPException(status_code=404, detail="file or span not found")
     return FileSpanResponse(
-        file_path=file_span.file_path, start_line=file_span.start_line,
-        end_line=file_span.end_line, content=file_span.content,
+        file_path=file_span.file_path,
+        start_line=file_span.start_line,
+        end_line=file_span.end_line,
+        content=file_span.content,
     )

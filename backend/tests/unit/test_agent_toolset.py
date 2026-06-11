@@ -9,27 +9,52 @@ from tests.unit.fakes import DeterministicEmbeddings, InMemoryChunkStore, InMemo
 
 def _chunk(file_path: str, symbol_name: str, language: str, code: str) -> CodeChunk:
     return CodeChunk(
-        chunk_id=build_chunk_id("repo1", file_path, 1, 2), repository_id="repo1",
-        file_path=file_path, language=language, start_line=1, end_line=2,
-        symbol_name=symbol_name, symbol_kind=SymbolKind.FUNCTION,
-        enclosing_scope=None, docstring=None, code=code,
+        chunk_id=build_chunk_id("repo1", file_path, 1, 2),
+        repository_id="repo1",
+        file_path=file_path,
+        language=language,
+        start_line=1,
+        end_line=2,
+        symbol_name=symbol_name,
+        symbol_kind=SymbolKind.FUNCTION,
+        enclosing_scope=None,
+        docstring=None,
+        code=code,
     )
 
 
 async def _build_toolset() -> AgentToolset:
     chunk_store = InMemoryChunkStore()
-    await chunk_store.write_chunks([
-        EmbeddedChunk(chunk=_chunk("src/auth.py", "authenticate_user", "python",
-                                   "def authenticate_user(): password_check()"), embedding=[0.0]),
-        EmbeddedChunk(chunk=_chunk("web/auth.ts", "authenticateUser", "typescript",
-                                   "function authenticateUser() { passwordCheck(); }"),
-                      embedding=[0.0]),
-    ])
+    await chunk_store.write_chunks(
+        [
+            EmbeddedChunk(
+                chunk=_chunk(
+                    "src/auth.py",
+                    "authenticate_user",
+                    "python",
+                    "def authenticate_user(): password_check()",
+                ),
+                embedding=[0.0],
+            ),
+            EmbeddedChunk(
+                chunk=_chunk(
+                    "web/auth.ts",
+                    "authenticateUser",
+                    "typescript",
+                    "function authenticateUser() { passwordCheck(); }",
+                ),
+                embedding=[0.0],
+            ),
+        ]
+    )
     file_store = InMemoryFileStore()
-    await file_store.write_files("repo1", [
-        SourceFile(relative_path="src/auth.py", content="l1\nl2\nl3", language="python"),
-        SourceFile(relative_path="docs/guide.md", content="# guide", language="markdown"),
-    ])
+    await file_store.write_files(
+        "repo1",
+        [
+            SourceFile(relative_path="src/auth.py", content="l1\nl2\nl3", language="python"),
+            SourceFile(relative_path="docs/guide.md", content="# guide", language="markdown"),
+        ],
+    )
     return AgentToolset(
         repository_id="repo1",
         chunk_searcher=chunk_store,
@@ -44,7 +69,10 @@ async def test_build_tools_exposes_the_four_contract_tools() -> None:
     toolset = await _build_toolset()
     tool_names = [tool.name for tool in toolset.build_tools()]
     assert tool_names == [
-        "search_code", "read_file_span", "list_repository_structure", "find_symbol"
+        "search_code",
+        "read_file_span",
+        "list_repository_structure",
+        "find_symbol",
     ]
     assert all(tool.description for tool in toolset.build_tools())
 

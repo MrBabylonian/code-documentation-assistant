@@ -22,10 +22,16 @@ from tests.unit.fakes import DeterministicEmbeddings, InMemoryChunkStore, InMemo
 async def _seeded_stores() -> tuple[InMemoryChunkStore, InMemoryFileStore]:
     chunk_store = InMemoryChunkStore()
     auth_chunk = CodeChunk(
-        chunk_id=build_chunk_id("repo1", "src/auth.py", 10, 42), repository_id="repo1",
-        file_path="src/auth.py", language="python", start_line=10, end_line=42,
-        symbol_name="authenticate_user", symbol_kind=SymbolKind.FUNCTION,
-        enclosing_scope=None, docstring=None,
+        chunk_id=build_chunk_id("repo1", "src/auth.py", 10, 42),
+        repository_id="repo1",
+        file_path="src/auth.py",
+        language="python",
+        start_line=10,
+        end_line=42,
+        symbol_name="authenticate_user",
+        symbol_kind=SymbolKind.FUNCTION,
+        enclosing_scope=None,
+        docstring=None,
         code="def authenticate_user():\n    validate_password()",
     )
     await chunk_store.write_chunks([EmbeddedChunk(chunk=auth_chunk, embedding=[0.0])])
@@ -40,8 +46,10 @@ def _build_strategy(
 ) -> AgenticAnswerStrategy:
     def toolset_factory(repository_id: str) -> AgentToolset:
         return AgentToolset(
-            repository_id=repository_id, chunk_searcher=chunk_store,
-            file_content_reader=file_store, embeddings=DeterministicEmbeddings(),
+            repository_id=repository_id,
+            chunk_searcher=chunk_store,
+            file_content_reader=file_store,
+            embeddings=DeterministicEmbeddings(),
             evidence_formatter=EvidenceFormatter(max_evidence_tokens_per_result=2000),
             search_top_k=5,
         )
@@ -60,10 +68,12 @@ def _build_strategy(
 
 
 async def test_tool_loop_emits_events_and_grounds_the_answer() -> None:
-    chat_model = ToolCallingScriptedChatModel(scripted_turns=[
-        {"tool_calls": [{"name": "search_code", "args": {"query": "authenticate password"}}]},
-        {"text": "Authentication is `authenticate_user` [cite: src/auth.py:10-42]."},
-    ])
+    chat_model = ToolCallingScriptedChatModel(
+        scripted_turns=[
+            {"tool_calls": [{"name": "search_code", "args": {"query": "authenticate password"}}]},
+            {"text": "Authentication is `authenticate_user` [cite: src/auth.py:10-42]."},
+        ]
+    )
     chunk_store, file_store = await _seeded_stores()
     strategy = _build_strategy(chat_model, chunk_store, file_store)
 
@@ -84,10 +94,12 @@ async def test_tool_loop_emits_events_and_grounds_the_answer() -> None:
 
 
 async def test_tool_budget_exhaustion_yields_error_event() -> None:
-    chat_model = ToolCallingScriptedChatModel(scripted_turns=[
-        # the same tool call forever — never a final text answer
-        {"tool_calls": [{"name": "search_code", "args": {"query": "authenticate"}}]},
-    ])
+    chat_model = ToolCallingScriptedChatModel(
+        scripted_turns=[
+            # the same tool call forever — never a final text answer
+            {"tool_calls": [{"name": "search_code", "args": {"query": "authenticate"}}]},
+        ]
+    )
     chunk_store, file_store = await _seeded_stores()
     strategy = _build_strategy(chat_model, chunk_store, file_store, max_tool_calls=2)
 
@@ -98,11 +110,13 @@ async def test_tool_budget_exhaustion_yields_error_event() -> None:
 
 
 async def test_zero_citation_final_answer_retries_once_without_tools() -> None:
-    chat_model = ToolCallingScriptedChatModel(scripted_turns=[
-        {"tool_calls": [{"name": "search_code", "args": {"query": "authenticate"}}]},
-        {"text": "It is authenticate_user, somewhere."},     # no citations → corrective retry
-        {"text": "It is `authenticate_user` [cite: src/auth.py:10-42]."},
-    ])
+    chat_model = ToolCallingScriptedChatModel(
+        scripted_turns=[
+            {"tool_calls": [{"name": "search_code", "args": {"query": "authenticate"}}]},
+            {"text": "It is authenticate_user, somewhere."},  # no citations → corrective retry
+            {"text": "It is `authenticate_user` [cite: src/auth.py:10-42]."},
+        ]
+    )
     chunk_store, file_store = await _seeded_stores()
     strategy = _build_strategy(chat_model, chunk_store, file_store)
 

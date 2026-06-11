@@ -92,9 +92,12 @@ def _build_default_container(settings: AppSettings) -> ApplicationContainer:
 
     def toolset_factory(repository_id: str) -> AgentToolset:
         return AgentToolset(
-            repository_id=repository_id, chunk_searcher=chunk_repository,
-            file_content_reader=file_store, embeddings=embeddings,
-            evidence_formatter=evidence_formatter, search_top_k=settings.search_top_k,
+            repository_id=repository_id,
+            chunk_searcher=chunk_repository,
+            file_content_reader=file_store,
+            embeddings=embeddings,
+            evidence_formatter=evidence_formatter,
+            search_top_k=settings.search_top_k,
         )
 
     question_answering_service = QuestionAnsweringService(
@@ -104,17 +107,24 @@ def _build_default_container(settings: AppSettings) -> ApplicationContainer:
         ),
         strategies={
             AnswerMode.AGENTIC: AgenticAnswerStrategy(
-                chat_model=chat_model, toolset_factory=toolset_factory,
-                citation_parser=citation_parser, citation_validator=citation_validator,
-                prompt_loader=prompt_loader, token_cost_calculator=token_cost_calculator,
+                chat_model=chat_model,
+                toolset_factory=toolset_factory,
+                citation_parser=citation_parser,
+                citation_validator=citation_validator,
+                prompt_loader=prompt_loader,
+                token_cost_calculator=token_cost_calculator,
                 max_tool_calls=settings.max_tool_calls,
                 max_history_turns=settings.max_history_turns,
                 model_name=settings.chat_model_name,
             ),
             AnswerMode.SINGLE_SHOT: SingleShotAnswerStrategy(
-                chat_model=chat_model, embeddings=embeddings, chunk_searcher=chunk_repository,
-                evidence_formatter=evidence_formatter, citation_parser=citation_parser,
-                citation_validator=citation_validator, prompt_loader=prompt_loader,
+                chat_model=chat_model,
+                embeddings=embeddings,
+                chunk_searcher=chunk_repository,
+                evidence_formatter=evidence_formatter,
+                citation_parser=citation_parser,
+                citation_validator=citation_validator,
+                prompt_loader=prompt_loader,
                 token_cost_calculator=token_cost_calculator,
                 search_top_k=settings.search_top_k,
                 max_history_turns=settings.max_history_turns,

@@ -28,7 +28,13 @@ class GitCloneClient:
     async def clone(self, github_url: str, destination: Path) -> ClonedRepository:
         repository_name = self.validate_github_url(github_url)
         clone_process = await asyncio.create_subprocess_exec(
-            "git", "clone", "--depth", "1", "--single-branch", github_url, str(destination),
+            "git",
+            "clone",
+            "--depth",
+            "1",
+            "--single-branch",
+            github_url,
+            str(destination),
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE,
         )

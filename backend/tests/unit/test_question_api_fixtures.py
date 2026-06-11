@@ -29,12 +29,19 @@ class StubAnswerStrategy:
         yield ToolCallEvent(tool_name="search_code", arguments={"query": question})
         yield ToolResultEvent(tool_name="search_code", summary="<evidence …>")
         yield AnswerTokenEvent(text="It is ")
-        yield AnswerCompletedEvent(answer=Answer(
-            text="It is `authenticate_user`.",
-            citations=[Citation(file_path="src/auth.py", start_line=1, end_line=2)],
-            is_grounded=True, mode=AnswerMode.AGENTIC, model_name="stub",
-            input_tokens=10, output_tokens=5, estimated_cost_usd=0.0001, latency_ms=7,
-        ))
+        yield AnswerCompletedEvent(
+            answer=Answer(
+                text="It is `authenticate_user`.",
+                citations=[Citation(file_path="src/auth.py", start_line=1, end_line=2)],
+                is_grounded=True,
+                mode=AnswerMode.AGENTIC,
+                model_name="stub",
+                input_tokens=10,
+                output_tokens=5,
+                estimated_cost_usd=0.0001,
+                latency_ms=7,
+            )
+        )
 
 
 @asynccontextmanager
@@ -55,7 +62,8 @@ async def build_question_api_client():
                 repository_store=repository_store,
                 scope_guard=QuestionScopeGuard(max_question_length_chars=2000),
                 strategies={
-                    AnswerMode.AGENTIC: stub_strategy, AnswerMode.SINGLE_SHOT: stub_strategy,
+                    AnswerMode.AGENTIC: stub_strategy,
+                    AnswerMode.SINGLE_SHOT: stub_strategy,
                 },
                 trace_writer=RecordingQueryTraceWriter(),
             ),
@@ -70,12 +78,19 @@ async def build_question_api_client():
         httpx.AsyncClient(transport=transport, base_url="http://testserver") as client,
         application.router.lifespan_context(application),
     ):
-        await repository_store.save(CodeRepository(
-            repository_id="repo1", github_url="https://github.com/owner/repo",
-            name="owner/repo", status=IngestionStatus.READY, error_message=None,
-            indexed_file_count=1, indexed_chunk_count=1,
-            created_at=datetime.now(UTC), updated_at=datetime.now(UTC),
-        ))
+        await repository_store.save(
+            CodeRepository(
+                repository_id="repo1",
+                github_url="https://github.com/owner/repo",
+                name="owner/repo",
+                status=IngestionStatus.READY,
+                error_message=None,
+                indexed_file_count=1,
+                indexed_chunk_count=1,
+                created_at=datetime.now(UTC),
+                updated_at=datetime.now(UTC),
+            )
+        )
         await file_store.write_files(
             "repo1",
             [SourceFile(relative_path="src/auth.py", content="l1\nl2\nl3", language="python")],

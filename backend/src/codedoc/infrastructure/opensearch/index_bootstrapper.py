@@ -43,9 +43,7 @@ class IndexBootstrapper:
                                 # order MUST match the hybrid query's queries array:
                                 # [bm25, knn]; weights must sum to exactly 1.0 or
                                 # OpenSearch rejects the search
-                                "parameters": {
-                                    "weights": [self._bm25_weight, self._knn_weight]
-                                },
+                                "parameters": {"weights": [self._bm25_weight, self._knn_weight]},
                             },
                         }
                     }

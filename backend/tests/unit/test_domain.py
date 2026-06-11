@@ -40,9 +40,16 @@ def test_chunk_id_format_and_composed_embedding_text() -> None:
 
 def test_composed_embedding_text_skips_missing_docstring() -> None:
     chunk = CodeChunk(
-        chunk_id="abc:path.py:1-2", repository_id="abc", file_path="path.py",
-        language="python", start_line=1, end_line=2, symbol_name=None,
-        symbol_kind=SymbolKind.TEXT_BLOCK, enclosing_scope=None, docstring=None,
+        chunk_id="abc:path.py:1-2",
+        repository_id="abc",
+        file_path="path.py",
+        language="python",
+        start_line=1,
+        end_line=2,
+        symbol_name=None,
+        symbol_kind=SymbolKind.TEXT_BLOCK,
+        enclosing_scope=None,
+        docstring=None,
         code="VALUE = 1\nOTHER = 2",
     )
     assert "\n\n" not in chunk.composed_embedding_text
@@ -60,13 +67,24 @@ def test_stream_events_carry_kind_discriminators_by_default() -> None:
 
 def test_repository_status_lifecycle_values() -> None:
     assert [status.value for status in IngestionStatus] == [
-        "pending", "cloning", "parsing", "embedding", "indexing", "ready", "failed",
+        "pending",
+        "cloning",
+        "parsing",
+        "embedding",
+        "indexing",
+        "ready",
+        "failed",
     ]
     repository = CodeRepository(
-        repository_id="abc123def456", github_url="https://github.com/owner/repo",
-        name="owner/repo", status=IngestionStatus.PENDING, error_message=None,
-        indexed_file_count=0, indexed_chunk_count=0,
-        created_at=datetime.now(UTC), updated_at=datetime.now(UTC),
+        repository_id="abc123def456",
+        github_url="https://github.com/owner/repo",
+        name="owner/repo",
+        status=IngestionStatus.PENDING,
+        error_message=None,
+        indexed_file_count=0,
+        indexed_chunk_count=0,
+        created_at=datetime.now(UTC),
+        updated_at=datetime.now(UTC),
     )
     assert repository.status is IngestionStatus.PENDING
     assert AnswerMode("agentic") is AnswerMode.AGENTIC

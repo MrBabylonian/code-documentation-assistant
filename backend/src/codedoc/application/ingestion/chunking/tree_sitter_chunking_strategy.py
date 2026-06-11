@@ -22,9 +22,17 @@ PYTHON_SYMBOL_NODE_TYPES = frozenset(
     {"function_definition", "class_definition", "decorated_definition"}
 )
 TYPESCRIPT_SYMBOL_NODE_TYPES = frozenset(
-    {"function_declaration", "generator_function_declaration", "class_declaration",
-     "abstract_class_declaration", "interface_declaration", "type_alias_declaration",
-     "enum_declaration", "lexical_declaration", "variable_declaration"}
+    {
+        "function_declaration",
+        "generator_function_declaration",
+        "class_declaration",
+        "abstract_class_declaration",
+        "interface_declaration",
+        "type_alias_declaration",
+        "enum_declaration",
+        "lexical_declaration",
+        "variable_declaration",
+    }
 )
 SYMBOL_KIND_BY_NODE_TYPE = {
     "function_definition": SymbolKind.FUNCTION,
@@ -64,19 +72,20 @@ class TreeSitterChunkingStrategy:
                 )
                 chunks.extend(emitted)
                 if emitted:
-                    covered_line_ranges.append((min(chunk.start_line for chunk in emitted),
-                                                max(chunk.end_line for chunk in emitted)))
-        chunks.extend(
-            self._leftover_text_blocks(repository_id, source_file, covered_line_ranges)
-        )
+                    covered_line_ranges.append(
+                        (
+                            min(chunk.start_line for chunk in emitted),
+                            max(chunk.end_line for chunk in emitted),
+                        )
+                    )
+        chunks.extend(self._leftover_text_blocks(repository_id, source_file, covered_line_ranges))
         return chunks
 
     def _unwrap_top_level(self, node: Node, language_name: str) -> list[Node]:
         # TS: exported declarations are nested under export_statement — descend or silently
         # miss every exported symbol.
         if node.type == "export_statement":
-            return [child for child in node.children
-                    if child.type in TYPESCRIPT_SYMBOL_NODE_TYPES]
+            return [child for child in node.children if child.type in TYPESCRIPT_SYMBOL_NODE_TYPES]
         symbol_node_types = (
             PYTHON_SYMBOL_NODE_TYPES if language_name == "python" else TYPESCRIPT_SYMBOL_NODE_TYPES
         )
@@ -103,58 +112,104 @@ class TreeSitterChunkingStrategy:
             symbol_kind is SymbolKind.CLASS
             and end_line - start_line + 1 > self._max_chunk_line_count
         ):
-            return self._split_class(repository_id, source_file, source_bytes, definition_node,
-                                     symbol_name, start_line)
+            return self._split_class(
+                repository_id, source_file, source_bytes, definition_node, symbol_name, start_line
+            )
 
-        return [self._build_chunk(
-            repository_id, source_file, source_bytes, range_node,
-            symbol_name, symbol_kind, enclosing_scope=None,
-            docstring=self._python_docstring(definition_node, source_bytes, source_file.language),
-        )]
+        return [
+            self._build_chunk(
+                repository_id,
+                source_file,
+                source_bytes,
+                range_node,
+                symbol_name,
+                symbol_kind,
+                enclosing_scope=None,
+                docstring=self._python_docstring(
+                    definition_node, source_bytes, source_file.language
+                ),
+            )
+        ]
 
     def _split_class(
-        self, repository_id: str, source_file: SourceFile, source_bytes: bytes,
-        class_node: Node, class_name: str | None, class_start_line: int,
+        self,
+        repository_id: str,
+        source_file: SourceFile,
+        source_bytes: bytes,
+        class_node: Node,
+        class_name: str | None,
+        class_start_line: int,
     ) -> list[CodeChunk]:
         body_node = class_node.child_by_field_name("body")
         method_nodes = (
-            [child for child in body_node.children if child.type in
-             {"function_definition", "decorated_definition", "method_definition"}]
-            if body_node is not None else []
+            [
+                child
+                for child in body_node.children
+                if child.type
+                in {"function_definition", "decorated_definition", "method_definition"}
+            ]
+            if body_node is not None
+            else []
         )
         chunks: list[CodeChunk] = []
         if method_nodes:
             first_method_start_line = min(node.start_point[0] + 1 for node in method_nodes)
             skeleton_lines = source_file.content.splitlines()[
-                class_start_line - 1:first_method_start_line - 1
+                class_start_line - 1 : first_method_start_line - 1
             ]
-            chunks.append(CodeChunk(
-                chunk_id=build_chunk_id(repository_id, source_file.relative_path,
-                                        class_start_line, first_method_start_line - 1),
-                repository_id=repository_id, file_path=source_file.relative_path,
-                language=source_file.language, start_line=class_start_line,
-                end_line=first_method_start_line - 1, symbol_name=class_name,
-                symbol_kind=SymbolKind.CLASS, enclosing_scope=None,
-                docstring=self._python_docstring(class_node, source_bytes, source_file.language),
-                code="\n".join(skeleton_lines).rstrip(),
-            ))
+            chunks.append(
+                CodeChunk(
+                    chunk_id=build_chunk_id(
+                        repository_id,
+                        source_file.relative_path,
+                        class_start_line,
+                        first_method_start_line - 1,
+                    ),
+                    repository_id=repository_id,
+                    file_path=source_file.relative_path,
+                    language=source_file.language,
+                    start_line=class_start_line,
+                    end_line=first_method_start_line - 1,
+                    symbol_name=class_name,
+                    symbol_kind=SymbolKind.CLASS,
+                    enclosing_scope=None,
+                    docstring=self._python_docstring(
+                        class_node, source_bytes, source_file.language
+                    ),
+                    code="\n".join(skeleton_lines).rstrip(),
+                )
+            )
         for method_node in method_nodes:
             definition_node = method_node
             if method_node.type == "decorated_definition":
                 definition_node = (
                     method_node.child_by_field_name("definition") or method_node.children[-1]
                 )
-            chunks.append(self._build_chunk(
-                repository_id, source_file, source_bytes, method_node,
-                self._symbol_name(definition_node), SymbolKind.METHOD, enclosing_scope=class_name,
-                docstring=self._python_docstring(definition_node, source_bytes,
-                                                 source_file.language),
-            ))
+            chunks.append(
+                self._build_chunk(
+                    repository_id,
+                    source_file,
+                    source_bytes,
+                    method_node,
+                    self._symbol_name(definition_node),
+                    SymbolKind.METHOD,
+                    enclosing_scope=class_name,
+                    docstring=self._python_docstring(
+                        definition_node, source_bytes, source_file.language
+                    ),
+                )
+            )
         return chunks
 
     def _build_chunk(
-        self, repository_id: str, source_file: SourceFile, source_bytes: bytes, range_node: Node,
-        symbol_name: str | None, symbol_kind: SymbolKind, enclosing_scope: str | None,
+        self,
+        repository_id: str,
+        source_file: SourceFile,
+        source_bytes: bytes,
+        range_node: Node,
+        symbol_name: str | None,
+        symbol_kind: SymbolKind,
+        enclosing_scope: str | None,
         docstring: str | None,
     ) -> CodeChunk:
         start_line = range_node.start_point[0] + 1
@@ -171,7 +226,7 @@ class TreeSitterChunkingStrategy:
             enclosing_scope=enclosing_scope,
             docstring=docstring,
             # slice the ORIGINAL bytes — byte offsets are not str offsets with non-ASCII source
-            code=source_bytes[range_node.start_byte:range_node.end_byte].decode(
+            code=source_bytes[range_node.start_byte : range_node.end_byte].decode(
                 "utf-8", errors="replace"
             ),
         )
@@ -208,13 +263,15 @@ class TreeSitterChunkingStrategy:
         string_node = first_statement.children[0]
         if string_node.type != "string":
             return None
-        raw_text = source_bytes[string_node.start_byte:string_node.end_byte].decode(
+        raw_text = source_bytes[string_node.start_byte : string_node.end_byte].decode(
             "utf-8", errors="replace"
         )
         return raw_text.strip("\"' \n")
 
     def _leftover_text_blocks(
-        self, repository_id: str, source_file: SourceFile,
+        self,
+        repository_id: str,
+        source_file: SourceFile,
         covered_line_ranges: list[tuple[int, int]],
     ) -> list[CodeChunk]:
         content_lines = source_file.content.splitlines()
@@ -238,16 +295,23 @@ class TreeSitterChunkingStrategy:
                     and trimmed[1] - trimmed[0] + 1 > MINIMUM_TEXT_BLOCK_LINE_COUNT
                 ):
                     trimmed_start, trimmed_end = trimmed
-                    text_blocks.append(CodeChunk(
-                        chunk_id=build_chunk_id(repository_id, source_file.relative_path,
-                                                trimmed_start, trimmed_end),
-                        repository_id=repository_id, file_path=source_file.relative_path,
-                        language=source_file.language, start_line=trimmed_start,
-                        end_line=trimmed_end,
-                        symbol_name=None, symbol_kind=SymbolKind.TEXT_BLOCK, enclosing_scope=None,
-                        docstring=None,
-                        code="\n".join(content_lines[trimmed_start - 1:trimmed_end]),
-                    ))
+                    text_blocks.append(
+                        CodeChunk(
+                            chunk_id=build_chunk_id(
+                                repository_id, source_file.relative_path, trimmed_start, trimmed_end
+                            ),
+                            repository_id=repository_id,
+                            file_path=source_file.relative_path,
+                            language=source_file.language,
+                            start_line=trimmed_start,
+                            end_line=trimmed_end,
+                            symbol_name=None,
+                            symbol_kind=SymbolKind.TEXT_BLOCK,
+                            enclosing_scope=None,
+                            docstring=None,
+                            code="\n".join(content_lines[trimmed_start - 1 : trimmed_end]),
+                        )
+                    )
                 block_start = None
         return text_blocks
 
