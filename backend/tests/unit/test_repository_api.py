@@ -58,6 +58,9 @@ def _fake_container_factory(settings: AppSettings) -> ApplicationContainer:
         ),
         file_content_reader=None,
         question_answering_service=None,
+        chunk_searcher=None,
+        embeddings=None,
+        judge_chat_model=None,
     )
 
 

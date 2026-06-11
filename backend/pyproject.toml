@@ -28,6 +28,8 @@ dev = [
     "pytest-asyncio==1.4.0",
     "ruff==0.15.16",
     "mypy==2.1.0",
+    # stubs for the loosely-pinned pyyaml runtime dependency; same loose pin
+    "types-pyyaml>=6.0,<7",
 ]
 
 [build-system]

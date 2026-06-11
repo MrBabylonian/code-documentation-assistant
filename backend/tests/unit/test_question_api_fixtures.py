@@ -67,6 +67,9 @@ async def build_question_api_client():
                 },
                 trace_writer=RecordingQueryTraceWriter(),
             ),
+            chunk_searcher=None,
+            embeddings=None,
+            judge_chat_model=None,
         )
 
     application = create_application(

@@ -5,6 +5,8 @@ from dataclasses import dataclass
 
 import structlog
 from fastapi import FastAPI, Request, Response
+from langchain_core.embeddings import Embeddings
+from langchain_core.language_models import BaseChatModel
 from opensearchpy import AsyncOpenSearch
 
 from codedoc.application.answering.citation_parser import CitationParser
@@ -29,7 +31,7 @@ from codedoc.application.ingestion.repository_ingestion_service import (
 )
 from codedoc.application.ingestion.source_file_scanner import SourceFileScanner
 from codedoc.application.ports.repository_store import RepositoryStore
-from codedoc.application.ports.searching import FileContentReader
+from codedoc.application.ports.searching import ChunkSearcher, FileContentReader
 from codedoc.domain.chat import AnswerMode
 from codedoc.infrastructure.agents.agent_toolset import AgentToolset
 from codedoc.infrastructure.agents.agentic_answer_strategy import AgenticAnswerStrategy
@@ -60,9 +62,12 @@ class ApplicationContainer:
     repository_ingestion_service: RepositoryIngestionService | None
     file_content_reader: FileContentReader | None
     question_answering_service: QuestionAnsweringService | None
+    chunk_searcher: ChunkSearcher | None
+    embeddings: Embeddings | None
+    judge_chat_model: BaseChatModel | None
 
 
-def _build_default_container(settings: AppSettings) -> ApplicationContainer:
+def build_default_container(settings: AppSettings) -> ApplicationContainer:
     from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
     opensearch_client = AsyncOpenSearch(hosts=[settings.opensearch_url])
@@ -78,6 +83,12 @@ def _build_default_container(settings: AppSettings) -> ApplicationContainer:
         openai_api_key=settings.openai_api_key,
         # OpenAI does not stream usage by default; without this flag token counts are zero
         stream_usage=True,
+    )
+    judge_chat_model = ChatOpenAI(
+        model=settings.chat_model_name,
+        openai_api_key=settings.openai_api_key,
+        # judging wants determinism, not creativity; streaming is not needed either
+        temperature=0,
     )
     evidence_formatter = EvidenceFormatter(
         max_evidence_tokens_per_result=settings.max_evidence_tokens_per_result
@@ -161,6 +172,9 @@ def _build_default_container(settings: AppSettings) -> ApplicationContainer:
         ),
         file_content_reader=file_store,
         question_answering_service=question_answering_service,
+        chunk_searcher=chunk_repository,
+        embeddings=embeddings,
+        judge_chat_model=judge_chat_model,
     )
 
 
@@ -171,7 +185,7 @@ def create_application(
     configure_logging()
     resolved_settings = settings if settings is not None else AppSettings()
     build_container = (
-        container_factory if container_factory is not None else _build_default_container
+        container_factory if container_factory is not None else build_default_container
     )
 
     @asynccontextmanager
