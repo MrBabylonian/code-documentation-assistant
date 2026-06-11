@@ -1,0 +1,9 @@
+from typing import Protocol
+
+from codedoc.domain.code_repository import CodeRepository
+
+
+class RepositoryStore(Protocol):
+    async def save(self, repository: CodeRepository) -> None: ...
+    async def get(self, repository_id: str) -> CodeRepository | None: ...
+    async def list_all(self) -> list[CodeRepository]: ...
