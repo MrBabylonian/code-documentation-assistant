@@ -1,5 +1,5 @@
 import uuid
-from collections.abc import AsyncIterator, Awaitable, Callable
+from collections.abc import AsyncGenerator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 
@@ -73,7 +73,10 @@ def build_default_container(settings: AppSettings) -> ApplicationContainer:
 
     opensearch_client = AsyncOpenSearch(hosts=[settings.opensearch_url])
     embeddings = OpenAIEmbeddings(
-        model=settings.embedding_model_name, openai_api_key=settings.openai_api_key
+        model=settings.embedding_model_name,
+        # field name, not the "api_key" alias: mypy's pydantic plugin wants the field,
+        # pyright's synthesized __init__ wants the alias — mypy is the CI gate, pyright yields
+        openai_api_key=settings.openai_api_key,  # pyright: ignore[reportCallIssue]
     )
     repository_store = OpensearchRepositoryStore(opensearch_client)
     chunk_repository = OpensearchChunkRepository(opensearch_client)
@@ -81,13 +84,13 @@ def build_default_container(settings: AppSettings) -> ApplicationContainer:
     chat_model = ChatOpenAI(
         model=settings.chat_model_name,
         # field name, not the "api_key" alias: mypy strict + pydantic plugin reject alias kwargs
-        openai_api_key=settings.openai_api_key,
+        openai_api_key=settings.openai_api_key,  # pyright: ignore[reportCallIssue]
         # OpenAI does not stream usage by default; without this flag token counts are zero
         stream_usage=True,
     )
     judge_chat_model = ChatOpenAI(
         model=settings.chat_model_name,
-        openai_api_key=settings.openai_api_key,
+        openai_api_key=settings.openai_api_key,  # pyright: ignore[reportCallIssue]
         # judging wants determinism, not creativity; streaming is not needed either
         temperature=0,
     )
@@ -184,13 +187,16 @@ def create_application(
     container_factory: Callable[[AppSettings], ApplicationContainer] | None = None,
 ) -> FastAPI:
     configure_logging()
-    resolved_settings = settings if settings is not None else AppSettings()
+    # pyright lacks mypy's pydantic-settings plugin: openai_api_key arrives from the env
+    resolved_settings = (
+        settings if settings is not None else AppSettings()  # pyright: ignore[reportCallIssue]
+    )
     build_container = (
         container_factory if container_factory is not None else build_default_container
     )
 
     @asynccontextmanager
-    async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+    async def lifespan(application: FastAPI) -> AsyncGenerator[None]:
         container = build_container(resolved_settings)
         application.state.container = container
         application.state.ingestion_tasks = set()
@@ -211,8 +217,8 @@ def create_application(
         allow_headers=["*"],
     )
 
-    @application.middleware("http")
-    async def bind_request_id(
+    @application.middleware("http")  # registration IS the use; pyright can't see it
+    async def bind_request_id(  # pyright: ignore[reportUnusedFunction]
         request: Request, call_next: Callable[[Request], Awaitable[Response]]
     ) -> Response:
         request_id = uuid.uuid4().hex
@@ -222,8 +228,8 @@ def create_application(
         response.headers["X-Request-Id"] = request_id
         return response
 
-    @application.get("/healthz")
-    async def healthz() -> dict[str, str]:
+    @application.get("/healthz")  # registration IS the use; pyright can't see it
+    async def healthz() -> dict[str, str]:  # pyright: ignore[reportUnusedFunction]
         return {"status": "ok"}
 
     application.include_router(repository_router)

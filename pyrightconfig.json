@@ -1,0 +1,48 @@
+{
+  // Pyright strict for the backend. The frontend is TypeScript (tsc owns it);
+  // docs and infra files are not Python.
+  "include": ["backend/src", "backend/tests"],
+  "exclude": [
+    "**/.*",
+    "**/__pycache__",
+    "**/node_modules",
+    "frontend",
+    "e2e",
+    "docs",
+    // parser-input fixture: intentionally not importable Python (undefined decorator);
+    // its bytes and line numbers are the chunking tests' contract
+    "backend/tests/fixtures/sample_module.py"
+  ],
+
+  // resolve the backend's uv-managed virtualenv (also what Pylance needs to
+  // stop reporting phantom unresolved imports in the IDE)
+  "venvPath": "backend",
+  "venv": ".venv",
+  "pythonVersion": "3.12",
+
+  "typeCheckingMode": "strict",
+
+  // Strict-mode relaxations, each deliberate:
+  // opensearch-py and parts of langchain are untyped/Any-typed at their edges;
+  // the reportUnknown* family would bury real findings under third-party noise.
+  // mypy --strict remains the CI gate; pyright adds IDE-time depth on top.
+  "reportUnknownMemberType": false,
+  "reportUnknownVariableType": false,
+  "reportUnknownArgumentType": false,
+  "reportUnknownParameterType": false,
+  "reportUnknownLambdaType": false,
+  "reportMissingTypeStubs": false,
+  // deliberate discards are NAMED (unused_stdout, unused_strategy) per NAMING.md,
+  // which bans the bare-underscore convention pyright recognizes; ruff F841 still
+  // guards plain assigned-never-used locals
+  "reportUnusedVariable": false,
+
+  "executionEnvironments": [
+    {
+      "root": "backend",
+      // src layout: "codedoc" lives under backend/src; tests import "tests.*"
+      // rooted at backend/
+      "extraPaths": ["backend/src", "backend"]
+    }
+  ]
+}

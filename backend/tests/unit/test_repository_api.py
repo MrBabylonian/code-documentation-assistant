@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import AsyncIterator
 from pathlib import Path
 
 import httpx
@@ -65,9 +66,13 @@ def _fake_container_factory(settings: AppSettings) -> ApplicationContainer:
 
 
 @pytest.fixture
-async def api_client() -> httpx.AsyncClient:
+async def api_client() -> AsyncIterator[httpx.AsyncClient]:
     application = create_application(
-        settings=AppSettings(openai_api_key="test-key", _env_file=None),
+        # pyright lacks mypy's pydantic-settings plugin (_env_file is a dynamic kwarg)
+        settings=AppSettings(
+            openai_api_key="test-key",
+            _env_file=None,  # pyright: ignore[reportCallIssue]
+        ),
         container_factory=_fake_container_factory,
     )
     # httpx 0.28 removed the app= shortcut; ASGITransport is the supported in-process route

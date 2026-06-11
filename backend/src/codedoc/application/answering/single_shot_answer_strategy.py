@@ -79,7 +79,8 @@ class SingleShotAnswerStrategy:
         for attempt_index in range(2):  # initial attempt + at most one citation retry
             answer_text = ""
             async for chunk in self._chat_model.astream(messages):
-                chunk_text = chunk.text if isinstance(chunk.text, str) else ""
+                # .text is a str subclass (TextAccessor) in langchain 1.x; normalize to plain str
+                chunk_text = str(chunk.text)
                 if chunk_text:
                     answer_text += chunk_text
                     yield AnswerTokenEvent(text=chunk_text)

@@ -166,9 +166,13 @@ async def run_evals(
     modes: list[AnswerMode],
     embedding_model_override: str | None,
 ) -> str:
-    settings = AppSettings() if embedding_model_override is None else AppSettings(
-        embedding_model_name=embedding_model_override
-    )
+    # pyright lacks mypy's pydantic-settings plugin: openai_api_key arrives from the env
+    if embedding_model_override is None:
+        settings = AppSettings()  # pyright: ignore[reportCallIssue]
+    else:
+        settings = AppSettings(  # pyright: ignore[reportCallIssue]
+            embedding_model_name=embedding_model_override
+        )
     container = build_default_container(settings)
     if container.index_bootstrapper is not None:
         # the runner bypasses the FastAPI lifespan, so it must create the indices itself

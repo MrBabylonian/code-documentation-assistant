@@ -73,7 +73,11 @@ async def build_question_api_client():
         )
 
     application = create_application(
-        settings=AppSettings(openai_api_key="test-key", _env_file=None),
+        # pyright lacks mypy's pydantic-settings plugin (_env_file is a dynamic kwarg)
+        settings=AppSettings(
+            openai_api_key="test-key",
+            _env_file=None,  # pyright: ignore[reportCallIssue]
+        ),
         container_factory=container_factory,
     )
     transport = httpx.ASGITransport(app=application)

@@ -30,6 +30,7 @@ dev = [
     "mypy==2.1.0",
     # stubs for the loosely-pinned pyyaml runtime dependency; same loose pin
     "types-pyyaml>=6.0,<7",
+    "pyright==1.1.410",
 ]
 
 [build-system]

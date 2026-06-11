@@ -7,7 +7,8 @@ def test_settings_read_defaults_and_env_overrides(monkeypatch: pytest.MonkeyPatc
     monkeypatch.setenv("CODEDOC_SEARCH_TOP_K", "13")
     from codedoc.settings import AppSettings
 
-    settings = AppSettings()
+    # pyright lacks mypy's pydantic-settings plugin: openai_api_key arrives from the env
+    settings = AppSettings()  # pyright: ignore[reportCallIssue]
     assert settings.openai_api_key == "test-key"
     assert settings.search_top_k == 13
     assert settings.opensearch_url == "http://localhost:9200"
@@ -22,4 +23,5 @@ def test_settings_require_openai_api_key(monkeypatch: pytest.MonkeyPatch) -> Non
     from codedoc.settings import AppSettings
 
     with pytest.raises(ValidationError):
-        AppSettings(_env_file=None)
+        # the missing-key failure is the point of the test; _env_file is a dynamic kwarg
+        AppSettings(_env_file=None)  # pyright: ignore[reportCallIssue]
