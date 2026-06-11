@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+dist/
+
+# Environment & secrets
+.env
+.env.local
+
+# OS noise
+.DS_Store
+
+# Assignment materials — must never reach the public submission repo
+Assignment - AI FDE.docx
+Forward Deployed Engineer_Remote.pdf
+~$*
+
+# Local working artifacts — binding for development, never committed (author rule)
+CLAUDE.md
+CODE_STYLE.md
+NAMING.md
+docs/superpowers/
+
+# Playwright
+e2e/test-results/
+e2e/playwright-report/

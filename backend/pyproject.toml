@@ -1,0 +1,59 @@
+[project]
+name = "codedoc"
+version = "0.1.0"
+description = "Code documentation assistant — agentic RAG over an OpenSearch code index"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi==0.136.3",
+    "uvicorn[standard]==0.49.0",
+    "pydantic==2.13.4",
+    "pydantic-settings==2.14.1",
+    "structlog==26.1.0",
+    "opensearch-py[async]==3.2.0",
+    "langgraph==1.2.4",
+    "langchain==1.3.7",
+    "langchain-openai==1.3.0",
+    "tree-sitter==0.25.2",
+    "tree-sitter-python==0.25.0",
+    "tree-sitter-typescript==0.23.2",
+    "tree-sitter-javascript==0.25.0",
+    "httpx==0.28.1",
+    # pyyaml is pinned loosely: only the eval harness reads YAML; minor-version drift is harmless.
+    "pyyaml>=6.0,<7",
+]
+
+[dependency-groups]
+dev = [
+    "pytest==9.0.3",
+    "pytest-asyncio==1.4.0",
+    "ruff==0.15.16",
+    "mypy==2.1.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/codedoc"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+markers = ["integration: needs a running OpenSearch at CODEDOC_OPENSEARCH_URL"]
+addopts = '-m "not integration"'
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "ASYNC", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+mypy_path = "src"
+packages = ["codedoc"]
