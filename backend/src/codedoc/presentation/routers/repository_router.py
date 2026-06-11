@@ -17,6 +17,8 @@ async def ingest_repository(
     request: Request, payload: IngestRepositoryRequest
 ) -> IngestRepositoryResponse:
     container = request.app.state.container
+    if container.repository_ingestion_service is None:
+        raise HTTPException(status_code=503, detail="ingestion service not configured")
     ingestion_task = asyncio.create_task(
         container.repository_ingestion_service.ingest(payload.github_url)
     )

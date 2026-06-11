@@ -56,6 +56,8 @@ def _fake_container_factory(settings: AppSettings) -> ApplicationContainer:
             repository_store=repository_store,
             embedding_batch_size=settings.embedding_batch_size,
         ),
+        file_content_reader=None,
+        question_answering_service=None,
     )
 
 
