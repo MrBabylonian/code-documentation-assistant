@@ -77,6 +77,9 @@ class InMemoryFileStore:
         content_lines = content.splitlines()
         clamped_start = max(1, start_line)
         clamped_end = min(len(content_lines), end_line)
+        if clamped_start > clamped_end:
+            # a span entirely past end-of-file is missing, not an inverted empty range
+            return None
         return FileSpan(
             file_path=file_path,
             start_line=clamped_start,

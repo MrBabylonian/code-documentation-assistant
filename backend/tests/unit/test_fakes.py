@@ -66,6 +66,7 @@ async def test_file_store_span_slicing_and_clamping() -> None:
     clamped_span = await file_store.read_span("repo1", "src/app.py", 3, 99)
     assert clamped_span is not None and clamped_span.end_line == 4
     assert await file_store.read_span("repo1", "missing.py", 1, 2) is None
+    assert await file_store.read_span("repo1", "src/app.py", 10, 12) is None
     assert await file_store.list_paths("repo1", "src/") == ["src/app.py"]
     assert await file_store.list_paths("repo1", "docs/") == []
 
