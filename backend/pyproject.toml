@@ -51,6 +51,11 @@ src = ["src", "tests"]
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "ASYNC", "SIM"]
 
+[tool.ruff.lint.per-file-ignores]
+# Chunking-test fixture: parsed as text, never imported; its bytes and line numbers are the
+# test contract, and the deliberately undefined decorator trips F821.
+"tests/fixtures/sample_module.py" = ["F821"]
+
 [tool.mypy]
 python_version = "3.12"
 strict = true
