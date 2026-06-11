@@ -1,3 +1,4 @@
+import json
 from collections.abc import AsyncIterator
 from typing import Any
 
@@ -71,3 +72,77 @@ class ScriptedChatModel(BaseChatModel):
                 ),
             )
             yield ChatGenerationChunk(message=chunk_message)
+
+
+class ToolCallingScriptedChatModel(BaseChatModel):
+    """Scripted model that can emit tool calls; ToolNode then executes REAL tools.
+
+    Each script entry is either {"tool_calls": [{"name": ..., "args": {...}}]}
+    or {"text": "..."}.
+    """
+
+    scripted_turns: list[dict[str, Any]]
+    turn_cursor: int = 0
+
+    @property
+    def _llm_type(self) -> str:
+        return "tool-calling-scripted-chat-model"
+
+    def bind_tools(self, tools: Any, **bind_kwargs: Any) -> "ToolCallingScriptedChatModel":
+        return self
+
+    def _next_message(self) -> AIMessage:
+        scripted_turn = self.scripted_turns[min(self.turn_cursor, len(self.scripted_turns) - 1)]
+        self.turn_cursor += 1
+        if "tool_calls" in scripted_turn:
+            return AIMessage(
+                content="",
+                tool_calls=[
+                    {
+                        "name": tool_call["name"],
+                        "args": tool_call["args"],
+                        "id": f"call_{self.turn_cursor}_{tool_call_index}",
+                        "type": "tool_call",
+                    }
+                    for tool_call_index, tool_call in enumerate(scripted_turn["tool_calls"])
+                ],
+                usage_metadata={"input_tokens": 50, "output_tokens": 10, "total_tokens": 60},
+            )
+        return AIMessage(
+            content=scripted_turn["text"],
+            usage_metadata={"input_tokens": 50, "output_tokens": 10, "total_tokens": 60},
+        )
+
+    def _generate(
+        self,
+        messages: list[BaseMessage],
+        stop: list[str] | None = None,
+        run_manager: CallbackManagerForLLMRun | None = None,
+        **generation_kwargs: Any,
+    ) -> ChatResult:
+        return ChatResult(generations=[ChatGeneration(message=self._next_message())])
+
+    async def _astream(
+        self,
+        messages: list[BaseMessage],
+        stop: list[str] | None = None,
+        run_manager: AsyncCallbackManagerForLLMRun | None = None,
+        **generation_kwargs: Any,
+    ) -> AsyncIterator[ChatGenerationChunk]:
+        scripted_message = self._next_message()
+        yield ChatGenerationChunk(
+            message=AIMessageChunk(
+                content=scripted_message.content,
+                tool_call_chunks=[
+                    {
+                        "name": tool_call["name"],
+                        "args": json.dumps(tool_call["args"]),
+                        "id": tool_call["id"],
+                        "index": tool_call_index,
+                        "type": "tool_call_chunk",
+                    }
+                    for tool_call_index, tool_call in enumerate(scripted_message.tool_calls)
+                ],
+                usage_metadata=scripted_message.usage_metadata,
+            )
+        )
