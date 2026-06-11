@@ -1,0 +1,29 @@
+backend/tests/unit/test_retrying_embeddings.py
+  s_e7c837504436c3::t_eddf8bb721ba21 1-83
+backend/src/codedoc/evals/eval_runner.py
+  s_e7c837504436c3::t_aaec914678dc4a 164-185
+  s_e7c837504436c3::t_2329d89853b464 217
+backend/src/codedoc/main.py
+  s_e7c837504436c3::t_9c32b040059b92 76-82
+  s_e7c837504436c3::t_0e1cf8d6a3daee 40
+backend/src/codedoc/infrastructure/openai/retrying_embeddings.py
+  s_e7c837504436c3::t_da0f18b090d1a1 50-52
+  s_e7c837504436c3::t_abf70318288321 2
+  s_e7c837504436c3::t_57a93ccb034b4a 1,3-49,53-66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "189a9890f0484104d492bac635fbe19fd2c2288d",
+  "prompts": {},
+  "sessions": {
+    "s_e7c837504436c3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "426c1489-49f1-4b40-91e7-620252ebeeb0",
+        "model": "claude-fable-5"
+      },
+      "human_author": "Bedirhan Gilgiler <bedirhangilgiler@gmail.com>"
+    }
+  }
+}
