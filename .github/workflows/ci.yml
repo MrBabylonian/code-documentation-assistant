@@ -70,9 +70,13 @@ jobs:
 
   docker-build:
     runs-on: ubuntu-latest
+    env:
+      # compose interpolates the required api env var even for `build`;
+      # nothing here ever calls OpenAI
+      CODEDOC_OPENAI_API_KEY: dummy-ci-build
     steps:
       - uses: actions/checkout@v6
       - run: docker compose build
 
 # Evals are deliberately NOT a CI gate: they call the OpenAI API (cost) and are
-# non-deterministic. Run `make eval` manually; commit the report to evals/reports/.
+# non-deterministic. Run `make eval` manually; commit the report from backend/evals/reports/.

@@ -56,15 +56,17 @@ answers say so.
 | Vector store | pgvector, Chroma, OpenSearch | **OpenSearch (lucene engine)** | real BM25 + k-NN + filters in one engine; faiss mutates stored cosine vectors, lucene doesn't |
 | Fusion | client-side RRF, native pipeline | **normalization-processor** | weighted min-max is a tuning knob RRF lacks; one round trip |
 | Orchestration | LangGraph, hand-rolled loop | **LangGraph** | explicit graph, budget via recursion_limit, native streaming modes |
-| Retrieval shape | single-shot RAG, agent | **agent + single-shot toggle** | code questions are heterogeneous; the eval table below shows the head-to-head |
+| Retrieval shape | single-shot RAG, agent | **agent + single-shot toggle** | code questions are heterogeneous; the eval report compares the two head-to-head |
 | Guardrails | detection, containment | **containment first** | tools are read-only; evidence is wrapped as data; citations validated; scope guard pre-filters |
+| Prompts | inline strings, versioned files | **versioned prompt files** | one system prompt per answering mode, loaded from `backend/src/codedoc/prompts/` — reviewable, diffable, and the citation/evidence contract lives in one place |
 
 ## Evals
 
 `make eval` ingests the golden repo and runs 25 questions (symbol lookups,
-multi-hop, endpoints, dependencies, adversarial probes) in both modes, judging
-faithfulness/correctness with an LLM judge against a written rubric. Reports land
-in `evals/reports/` — the latest one is committed.
+multi-hop, endpoints, dependencies, adversarial probes) in both modes — agentic
+vs single-shot head-to-head — judging faithfulness/correctness with an LLM judge
+against a written rubric (`backend/src/codedoc/evals/judge_rubric.md`). The
+report lands in `backend/evals/reports/` and is committed after each run.
 
 ## Productionizing on AWS
 

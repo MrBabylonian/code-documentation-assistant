@@ -1,4 +1,4 @@
-.PHONY: up down test-backend test-integration test-frontend lint eval
+.PHONY: up down test-backend test-integration test-frontend lint eval e2e
 
 up:
 	docker compose up --build -d
@@ -21,3 +21,6 @@ lint:
 
 eval:
 	cd backend && uv run python -m codedoc.evals.eval_runner --mode both
+
+e2e:
+	cd e2e && npm ci && npx playwright test

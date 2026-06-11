@@ -19,16 +19,15 @@ dist/
 # OS noise
 .DS_Store
 
-# Assignment materials — must never reach the public submission repo
+# Local working files
 Assignment - AI FDE.docx
 Forward Deployed Engineer_Remote.pdf
 ~$*
-
-# Local working artifacts — binding for development, never committed (author rule)
 CLAUDE.md
 CODE_STYLE.md
 NAMING.md
 docs/superpowers/
+docker-compose.override.yml
 
 # Playwright
 e2e/test-results/
