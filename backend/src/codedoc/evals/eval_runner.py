@@ -127,9 +127,15 @@ async def _evaluate_question(
             completed_answer is not None and REFUSAL_MARKER in completed_answer.text.lower()
         )
         return QuestionResult(
-            question_id=question.id, category=question.category, hit_at_5=None,
-            reciprocal_rank=None, faithfulness=None, correctness=None, is_grounded=None,
-            refused_ok=was_refused, latency_ms=latency_ms,
+            question_id=question.id,
+            category=question.category,
+            hit_at_5=None,
+            reciprocal_rank=None,
+            faithfulness=None,
+            correctness=None,
+            is_grounded=None,
+            refused_ok=was_refused,
+            latency_ms=latency_ms,
             cost_usd=completed_answer.estimated_cost_usd if completed_answer else 0.0,
         )
 
@@ -145,18 +151,19 @@ async def _evaluate_question(
 
     answer_text = completed_answer.text if completed_answer else (error_message or "")
     cited_files = (
-        [citation.file_path for citation in completed_answer.citations]
-        if completed_answer
-        else []
+        [citation.file_path for citation in completed_answer.citations] if completed_answer else []
     )
     judge_scores = await _judge(judge_chat_model, question, answer_text, cited_files)
     return QuestionResult(
-        question_id=question.id, category=question.category,
-        hit_at_5=reciprocal_rank > 0.0, reciprocal_rank=reciprocal_rank,
+        question_id=question.id,
+        category=question.category,
+        hit_at_5=reciprocal_rank > 0.0,
+        reciprocal_rank=reciprocal_rank,
         faithfulness=judge_scores.faithfulness if judge_scores else None,
         correctness=judge_scores.correctness if judge_scores else None,
         is_grounded=completed_answer.is_grounded if completed_answer else False,
-        refused_ok=None, latency_ms=latency_ms,
+        refused_ok=None,
+        latency_ms=latency_ms,
         cost_usd=completed_answer.estimated_cost_usd if completed_answer else 0.0,
     )
 
@@ -177,9 +184,16 @@ async def _evaluate_question_resiliently(
             if attempt_number == 1:
                 await asyncio.sleep(2)
     return QuestionResult(
-        question_id=question.id, category=question.category, hit_at_5=None,
-        reciprocal_rank=None, faithfulness=None, correctness=None, is_grounded=None,
-        refused_ok=None, latency_ms=0, cost_usd=0.0,
+        question_id=question.id,
+        category=question.category,
+        hit_at_5=None,
+        reciprocal_rank=None,
+        faithfulness=None,
+        correctness=None,
+        is_grounded=None,
+        refused_ok=None,
+        latency_ms=0,
+        cost_usd=0.0,
     )
 
 
@@ -218,12 +232,15 @@ async def run_evals(
             for question in questions
         ]
 
-    report_markdown = build_report(mode_results, header_facts={
-        "date": datetime.now(UTC).isoformat(timespec="seconds"),
-        "repository": repository.name,
-        "chat_model": settings.chat_model_name,
-        "embedding_model": settings.embedding_model_name,
-    })
+    report_markdown = build_report(
+        mode_results,
+        header_facts={
+            "date": datetime.now(UTC).isoformat(timespec="seconds"),
+            "repository": repository.name,
+            "chat_model": settings.chat_model_name,
+            "embedding_model": settings.embedding_model_name,
+        },
+    )
     if container.opensearch_client is not None:
         await container.opensearch_client.close()
     return report_markdown
@@ -242,8 +259,9 @@ def main() -> None:
     argument_parser.add_argument(
         "--mode", choices=["agentic", "single_shot", "both"], default="both"
     )
-    argument_parser.add_argument("--embedding-model", default=None,
-                                 help="override the embedder (forces a fresh ingest)")
+    argument_parser.add_argument(
+        "--embedding-model", default=None, help="override the embedder (forces a fresh ingest)"
+    )
     argument_parser.add_argument("--output-dir", default="evals/reports", type=Path)
     arguments = argument_parser.parse_args()
     selected_modes = (
@@ -251,9 +269,9 @@ def main() -> None:
         if arguments.mode == "both"
         else [AnswerMode(arguments.mode)]
     )
-    report_markdown = asyncio.run(run_evals(
-        arguments.repository_url, selected_modes, arguments.embedding_model
-    ))
+    report_markdown = asyncio.run(
+        run_evals(arguments.repository_url, selected_modes, arguments.embedding_model)
+    )
     report_path = _write_report(report_markdown, arguments.output_dir)
     print(f"report written: {report_path}")
 

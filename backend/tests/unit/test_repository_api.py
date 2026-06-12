@@ -147,11 +147,7 @@ async def test_cors_allows_the_frontend_origin(api_client: httpx.AsyncClient) ->
         },
     )
     assert preflight_response.status_code == 200
-    assert (
-        preflight_response.headers["access-control-allow-origin"] == "http://localhost:3000"
-    )
+    assert preflight_response.headers["access-control-allow-origin"] == "http://localhost:3000"
 
-    simple_response = await api_client.get(
-        "/healthz", headers={"Origin": "http://localhost:3000"}
-    )
+    simple_response = await api_client.get("/healthz", headers={"Origin": "http://localhost:3000"})
     assert simple_response.headers["access-control-allow-origin"] == "http://localhost:3000"

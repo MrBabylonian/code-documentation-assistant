@@ -5,12 +5,12 @@ from dataclasses import dataclass
 class QuestionResult:
     question_id: str
     category: str
-    hit_at_5: bool | None          # None for adversarial questions
+    hit_at_5: bool | None  # None for adversarial questions
     reciprocal_rank: float | None
-    faithfulness: int | None       # None when the judge failed or N/A
+    faithfulness: int | None  # None when the judge failed or N/A
     correctness: int | None
     is_grounded: bool | None
-    refused_ok: bool | None        # adversarial only
+    refused_ok: bool | None  # adversarial only
     latency_ms: int
     cost_usd: float
 
@@ -30,7 +30,8 @@ def _mode_table(results: list[QuestionResult]) -> str:
             "| {id} | {category} | {hit} | {mrr} | {faith} | {correct} | {grounded} |"
             " {refused} | {latency} | {cost:.4f} |"
         ).format(
-            id=result.question_id, category=result.category,
+            id=result.question_id,
+            category=result.category,
             hit=_format_optional(result.hit_at_5),
             mrr=_format_optional(
                 None if result.reciprocal_rank is None else round(result.reciprocal_rank, 2)
@@ -39,7 +40,8 @@ def _mode_table(results: list[QuestionResult]) -> str:
             correct=_format_optional(result.correctness),
             grounded=_format_optional(result.is_grounded),
             refused=_format_optional(result.refused_ok),
-            latency=result.latency_ms, cost=result.cost_usd,
+            latency=result.latency_ms,
+            cost=result.cost_usd,
         )
         for result in results
     ]
@@ -80,8 +82,15 @@ def build_report(
             f"- {metric_name}: {metric_value}"
             for metric_name, metric_value in _aggregates(results).items()
         )
-    sections.extend(["", "## Comparison", "", "| metric | " + " | ".join(mode_results) + " |",
-                     "|---|" + "---|" * len(mode_results)])
+    sections.extend(
+        [
+            "",
+            "## Comparison",
+            "",
+            "| metric | " + " | ".join(mode_results) + " |",
+            "|---|" + "---|" * len(mode_results),
+        ]
+    )
     metric_names = list(_aggregates(next(iter(mode_results.values()))).keys())
     for metric_name in metric_names:
         row_values = [_aggregates(results)[metric_name] for results in mode_results.values()]
