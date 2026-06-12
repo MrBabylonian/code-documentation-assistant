@@ -65,11 +65,38 @@ answers say so.
 
 ## Evals
 
-`make eval` ingests the golden repo and runs 25 questions (symbol lookups,
-multi-hop, endpoints, dependencies, adversarial probes) in both modes — agentic
-vs single-shot head-to-head — judging faithfulness/correctness with an LLM judge
-against a written rubric (`backend/src/codedoc/evals/judge_rubric.md`). The
-report lands in `backend/evals/reports/` and is committed after each run.
+`make eval` ingests the golden repo
+([`fastapi/full-stack-fastapi-template`](https://github.com/fastapi/full-stack-fastapi-template))
+and runs 25 questions (symbol lookups, multi-hop, endpoints, dependencies, and
+adversarial probes) in both modes — agentic vs single-shot head-to-head — scoring
+retrieval (hit@5, MRR against expected files), answer faithfulness/correctness via
+an LLM judge against a written rubric (`backend/src/codedoc/evals/judge_rubric.md`),
+citation grounding, and adversarial refusal. The full report lands in
+`backend/evals/reports/`; the latest run is committed there.
+
+Headline from the committed run (`gpt-5.4-mini` + `text-embedding-3-large`, 22
+scored + 3 adversarial questions):
+
+| metric | agentic | single-shot |
+|---|---|---|
+| retrieval hit@5 | 0.86 | 0.86 |
+| retrieval MRR | 0.73 | 0.73 |
+| faithfulness (1–5) | 4.55 | 4.59 |
+| correctness (1–5) | 4.64 | 4.50 |
+| grounded rate | 0.95 | 0.95 |
+| adversarial refusal | 1.00 | 1.00 |
+| mean latency | 5.6 s | 1.9 s |
+| total cost (25 q) | $0.23 | $0.08 |
+
+The honest read: both modes share the same hybrid retrieval, so their hit@5/MRR
+are identical — the agent's extra tool calls don't improve *finding* the code, they
+improve *reasoning across* it, which is why agentic edges correctness on the
+multi-hop questions while costing ~3× the latency and tokens. For most single-file
+lookups the single-shot path is the better default; the agent earns its cost on the
+hard cross-file questions. The eval harness is what surfaced that trade-off rather
+than assuming it — which is the whole point of treating evals as a first-class
+discipline. All three adversarial probes (prompt-injection, off-topic, out-of-repo)
+were refused in both modes.
 
 ## Productionizing on AWS
 
