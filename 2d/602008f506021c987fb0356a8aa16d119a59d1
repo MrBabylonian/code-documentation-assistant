@@ -1,0 +1,24 @@
+.gitignore
+  s_e7c837504436c3::t_8d162826a38d29 32
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "2d602008f506021c987fb0356a8aa16d119a59d1",
+  "prompts": {},
+  "humans": {
+    "h_83703cc0278db0": {
+      "author": "Bedirhan Gilgiler <bedirhangilgiler@gmail.com>"
+    }
+  },
+  "sessions": {
+    "s_e7c837504436c3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "426c1489-49f1-4b40-91e7-620252ebeeb0",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Bedirhan Gilgiler <bedirhangilgiler@gmail.com>"
+    }
+  }
+}
