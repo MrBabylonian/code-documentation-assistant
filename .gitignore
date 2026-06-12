@@ -20,8 +20,8 @@ dist/
 .DS_Store
 
 # Local working files
-Assignment - AI FDE.docx
-Forward Deployed Engineer_Remote.pdf
+*.docx
+*.pdf
 ~$*
 CLAUDE.md
 CODE_STYLE.md

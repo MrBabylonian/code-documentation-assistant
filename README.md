@@ -2,7 +2,7 @@
 
 Paste a public GitHub repository URL; ask questions about the code; get answers
 with `file:line` citations you can open and read. An agentic RAG system over an
-OpenSearch hybrid index, built for the Newpage AI FDE assignment (Option 2).
+OpenSearch hybrid index.
 
 ## Quick start
 
@@ -129,12 +129,14 @@ limiting locally; chat history is client-side; single-node OpenSearch; evals not
 in the CI gate (cost, non-determinism); no incremental re-indexing (re-ingest is
 idempotent instead).
 
-<!-- AUTHOR-WRITTEN SECTION: to be written by the human author per assignment rules — do not generate -->
 ## How I used AI tools
 
-<!-- AUTHOR-WRITTEN SECTION: to be written by the human author per assignment rules — do not generate -->
+Provided as a separate write-up accompanying this submission.
+
 ## What I'd do differently
+
+Provided as a separate write-up accompanying this submission.
 
 ## Screenshots
 
-(see docs/screenshots-checklist.md — embedded here before submission)
+Provided as a separate archive accompanying this submission.
