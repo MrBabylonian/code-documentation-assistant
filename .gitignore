@@ -29,6 +29,7 @@ NAMING.md
 docs/superpowers/
 docker-compose.override.yml
 submission-notes-DRAFT.md
+screenshots/
 
 # Playwright
 e2e/test-results/
