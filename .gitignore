@@ -28,6 +28,7 @@ CODE_STYLE.md
 NAMING.md
 docs/superpowers/
 docker-compose.override.yml
+submission-notes-DRAFT.md
 
 # Playwright
 e2e/test-results/
