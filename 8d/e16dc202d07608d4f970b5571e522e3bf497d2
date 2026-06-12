@@ -1,0 +1,19 @@
+.github/workflows/ci.yml
+  s_e7c837504436c3::t_215333d5ef64cf 16,48
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8de16dc202d07608d4f970b5571e522e3bf497d2",
+  "prompts": {},
+  "sessions": {
+    "s_e7c837504436c3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "426c1489-49f1-4b40-91e7-620252ebeeb0",
+        "model": "claude-opus-4-8"
+      },
+      "human_author": "Bedirhan Gilgiler <bedirhangilgiler@gmail.com>"
+    }
+  }
+}
