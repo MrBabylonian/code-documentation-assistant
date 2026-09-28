@@ -129,14 +129,6 @@ limiting locally; chat history is client-side; single-node OpenSearch; evals not
 in the CI gate (cost, non-determinism); no incremental re-indexing (re-ingest is
 idempotent instead).
 
-## How I used AI tools
-
-Provided as a separate write-up accompanying this submission.
-
-## What I'd do differently
-
-Provided as a separate write-up accompanying this submission.
-
 ## Screenshots
 
 Provided as a separate archive accompanying this submission.
