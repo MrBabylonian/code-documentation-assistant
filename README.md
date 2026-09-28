@@ -128,7 +128,3 @@ Consciously skipped (documented trade-offs): no auth / multi-tenancy; no rate
 limiting locally; chat history is client-side; single-node OpenSearch; evals not
 in the CI gate (cost, non-determinism); no incremental re-indexing (re-ingest is
 idempotent instead).
-
-## Screenshots
-
-Provided as a separate archive accompanying this submission.
